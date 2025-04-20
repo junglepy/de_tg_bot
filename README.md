@@ -45,7 +45,7 @@ Telegram бот, отвечающий на вопросы с помощью LLM 
 Для использования YandexGPT:
 1. Получите API ключ в личном кабинете [Yandex Cloud](https://cloud.yandex.ru/)
 2. В .env файле укажите `LLM_API_URL=http://yandexgpt-adapter:9041/v1`
-3. Создайте и настройте переменные окружения в `openai-yandexgpt-adapter` согласно документации адаптера (требуется API ключ и folder_id)
+
 
 ## Аналитика
 
