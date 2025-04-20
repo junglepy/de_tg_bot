@@ -1,4 +1,9 @@
 python-telegram-bot==20.7
 python-dotenv==1.0.0
 openai==1.13.3
-psycopg2-binary==2.9.9 
+psycopg2-binary==2.9.9
+pandas==2.2.0
+openpyxl==3.1.2
+requests==2.31.0
+yadisk[sync_defaults]==2.0.0
+schedule==1.2.0 

@@ -7,3 +7,5 @@ user_id,datetime,action,completion_tokens,prompt_tokens,model
 1669663022,2025-04-20 09:32:48,answer,8,11,yandexgpt/rc
 401630765,2025-04-20 10:03:50,start,0,0,yandexgpt/rc
 401630765,2025-04-20 10:04:12,answer,49,13,yandexgpt/rc
+1669663022,2025-04-20 12:38:04,answer,10,11,yandexgpt/rc
+1669663022,2025-04-20 12:42:01,answer,8,11,yandexgpt/rc

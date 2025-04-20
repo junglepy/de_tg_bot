@@ -27,6 +27,15 @@ CREATE TABLE IF NOT EXISTS analytics (
 
 echo "База данных инициализирована!"
 
+# Ожидание готовности YandexGPT адаптера
+echo "Ожидание готовности YandexGPT адаптера..."
+sleep 10
+echo "Предполагаем, что YandexGPT адаптер готов!"
+
+# Запуск экспортера в фоновом режиме
+echo "Запуск экспортера данных в фоновом режиме..."
+python -m llm_telegram_bot.export &
+
 # Запуск основного приложения
 echo "Запуск Telegram бота..."
 exec python /app/llm_telegram_bot/bot.py 

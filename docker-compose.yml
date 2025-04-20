@@ -6,7 +6,6 @@ services:
       - ./llm_telegram_bot/.env
       - ./postgres/.env
     volumes:
-      - ./logs:/logs
       - ./analytics:/app/analytics
     ports:
       - "8080:8080"
