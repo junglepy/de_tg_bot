@@ -132,7 +132,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     log_analytics(user_id, "start")
     
     await update.message.reply_html(
-        rf"Привет {user.mention_html()}! Я бот, который использует OpenAI API для ответов на ваши вопросы.",
+        rf"Привет {user.mention_html()}! Я бот, который использует модель {model} для ответов на ваши вопросы.",
         reply_markup=ForceReply(selective=True),
     )
 
@@ -144,7 +144,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     # Логируем событие help
     log_analytics(user_id, "help")
     
-    await update.message.reply_text("Просто отправьте мне сообщение, и я отвечу используя LLM модель!")
+    await update.message.reply_text("Просто отправьте мне сообщение, и я отвечу используя LLM!")
 
 
 async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
