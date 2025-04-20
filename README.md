@@ -18,12 +18,16 @@ Telegram бот, отвечающий на вопросы с помощью LLM 
 ## Запуск
 
 1. Клонировать репозиторий
-2. Создать и настроить файлы переменных окружения:
+2. Инициализировать подмодули:
+   ```
+   git submodule update --init --recursive
+   ```
+3. Создать и настроить файлы переменных окружения:
    ```
    cp llm_telegram_bot/.env.example llm_telegram_bot/.env
    cp postgres/.env.example postgres/.env
    ```
-3. Запустить сервисы:
+4. Запустить сервисы:
    ```
    docker compose up -d
    ```
@@ -35,6 +39,13 @@ Telegram бот, отвечающий на вопросы с помощью LLM 
 - URL API (`LLM_API_URL`)
 - Модель LLM (`MODEL`)
 - Токен Яндекс.Диска (`YADISK_TOKEN`)
+
+## Настройка YandexGPT
+
+Для использования YandexGPT:
+1. Получите API ключ в личном кабинете [Yandex Cloud](https://cloud.yandex.ru/)
+2. В .env файле укажите `LLM_API_URL=http://yandexgpt-adapter:9041/v1`
+3. Создайте и настройте переменные окружения в `openai-yandexgpt-adapter` согласно документации адаптера (требуется API ключ и folder_id)
 
 ## Аналитика
 
