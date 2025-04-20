@@ -6,6 +6,7 @@ services:
       - ./llm_telegram_bot/.env
     volumes:
       - ./logs:/logs
+      - ./analytics:/app/analytics
     ports:
       - "8080:8080"
     restart: unless-stopped

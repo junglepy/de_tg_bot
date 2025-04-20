@@ -3,6 +3,8 @@
 
 import logging
 import os
+import csv
+from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -28,10 +30,44 @@ client = OpenAI(
     base_url=openai_api_base,
 )
 
+# Путь к CSV файлу аналитики
+ANALYTICS_FILE = "/app/analytics/user_actions.csv"
+
+def log_analytics(user_id, action, completion_tokens=0, prompt_tokens=0):
+    """Логирование действий пользователя в CSV файл."""
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Создаем файл, если он не существует
+    file_exists = os.path.isfile(ANALYTICS_FILE)
+    
+    try:
+        with open(ANALYTICS_FILE, 'a', newline='') as csvfile:
+            fieldnames = ['user_id', 'datetime', 'action', 'completion_tokens', 'prompt_tokens', 'model']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            
+            if not file_exists:
+                writer.writeheader()
+            
+            writer.writerow({
+                'user_id': user_id,
+                'datetime': now,
+                'action': action,
+                'completion_tokens': completion_tokens,
+                'prompt_tokens': prompt_tokens,
+                'model': model
+            })
+    except Exception as e:
+        logger.error(f"Ошибка при записи аналитики: {e}")
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
+    user_id = update.message.from_user.id
+    
+    # Логируем событие start
+    log_analytics(user_id, "start")
+    
     await update.message.reply_html(
         rf"Привет {user.mention_html()}! Я бот, который использует OpenAI API для ответов на ваши вопросы.",
         reply_markup=ForceReply(selective=True),
@@ -40,12 +76,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
+    user_id = update.message.from_user.id
+    
+    # Логируем событие help
+    log_analytics(user_id, "help")
+    
     await update.message.reply_text("Просто отправьте мне сообщение, и я отвечу используя LLM модель!")
 
 
 async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Process the user message with OpenAI API."""
     user_message = update.message.text
+    user_id = update.message.from_user.id
     
     await update.message.chat.send_action(action="typing")
     
@@ -60,6 +102,11 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         
         # Получение ответа от модели
         bot_response = response.choices[0].message.content
+        
+        # Логируем событие answer с информацией о токенах
+        completion_tokens = response.usage.completion_tokens
+        prompt_tokens = response.usage.prompt_tokens
+        log_analytics(user_id, "answer", completion_tokens, prompt_tokens)
         
         # Отправка ответа пользователю
         await update.message.reply_text(bot_response)
