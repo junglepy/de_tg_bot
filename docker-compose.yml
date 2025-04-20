@@ -1,0 +1,19 @@
+services:
+  llm_telegram_bot:
+    build: 
+      context: ./llm_telegram_bot
+    env_file:
+      - ./llm_telegram_bot/.env
+    volumes:
+      - ./logs:/logs
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps -ef | grep llm_telegram_bot.bot | grep -v grep || exit 1"]
+      interval: 5s
+      retries: 3
+
+networks:
+  default:
+    name: de_tbot_network 
