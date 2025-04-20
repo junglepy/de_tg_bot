@@ -1,0 +1,3 @@
+[submodule "openai-yandexgpt-adapter"]
+	path = openai-yandexgpt-adapter
+	url = https://github.com/ai-cookbook/openai-yandexgpt-adapter.git

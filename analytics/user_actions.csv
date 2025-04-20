@@ -1,2 +1,9 @@
 user_id,datetime,action,completion_tokens,prompt_tokens,model
 1669663022,2025-04-20 08:22:46,answer,11,9,gpt-4o-mini
+1669663022,2025-04-20 08:37:20,answer,181,14,gpt-4o-mini
+1669663022,2025-04-20 08:50:22,answer,29,11,gpt-4o-mini
+1669663022,2025-04-20 09:31:34,answer,6,11,gpt-4o-mini
+1669663022,2025-04-20 09:31:35,answer,6,11,gpt-4o-mini
+1669663022,2025-04-20 09:32:48,answer,8,11,yandexgpt/rc
+401630765,2025-04-20 10:03:50,start,0,0,yandexgpt/rc
+401630765,2025-04-20 10:04:12,answer,49,13,yandexgpt/rc

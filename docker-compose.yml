@@ -4,6 +4,7 @@ services:
       context: ./llm_telegram_bot
     env_file:
       - ./llm_telegram_bot/.env
+      - ./postgres/.env
     volumes:
       - ./logs:/logs
       - ./analytics:/app/analytics
@@ -14,6 +15,33 @@ services:
       test: ["CMD-SHELL", "ps -ef | grep llm_telegram_bot.bot | grep -v grep || exit 1"]
       interval: 5s
       retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      yandexgpt-adapter:
+        condition: service_started
+
+  postgres:
+    image: postgres:16
+    env_file:
+      - ./postgres/.env
+    ports:
+      - "5633:5432"
+    volumes:
+      - ./volumes/postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      
+  yandexgpt-adapter:
+    build:
+      context: ./openai-yandexgpt-adapter
+    ports:
+      - "9041:9041"
+    restart: unless-stopped
 
 networks:
   default:

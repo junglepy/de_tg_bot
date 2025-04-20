@@ -4,6 +4,9 @@
 import logging
 import os
 import csv
+import json
+import psycopg2
+from psycopg2 import sql
 from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -33,11 +36,68 @@ client = OpenAI(
 # Путь к CSV файлу аналитики
 ANALYTICS_FILE = "/app/analytics/user_actions.csv"
 
-def log_analytics(user_id, action, completion_tokens=0, prompt_tokens=0):
-    """Логирование действий пользователя в CSV файл."""
+# PostgreSQL config
+PG_HOST = os.getenv("POSTGRES_HOST", "postgres")
+PG_PORT = os.getenv("POSTGRES_PORT", "5432")
+PG_USER = os.getenv("POSTGRES_USER", "postgres")
+PG_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+PG_DB = os.getenv("POSTGRES_DB", "telegram_bot")
+
+def get_db_connection():
+    """Получение соединения с БД."""
+    try:
+        conn = psycopg2.connect(
+            host=PG_HOST,
+            port=PG_PORT,
+            user=PG_USER,
+            password=PG_PASSWORD,
+            dbname=PG_DB
+        )
+        return conn
+    except Exception as e:
+        logger.error(f"Ошибка соединения с БД: {e}")
+        return None
+
+def log_to_db(user_id, action, completion_tokens=0, prompt_tokens=0, messages=None, answer=None):
+    """Логирование в PostgreSQL."""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            logger.error("Не удалось получить соединение с БД")
+            return
+            
+        cursor = conn.cursor()
+        
+        query = '''
+        INSERT INTO analytics (user_id, datetime, action, completion_tokens, prompt_tokens, model, messages, answer)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        
+        now = datetime.now()
+        messages_json = json.dumps(messages) if messages else None
+        
+        cursor.execute(query, (
+            user_id, 
+            now, 
+            action, 
+            completion_tokens, 
+            prompt_tokens,
+            model,
+            messages_json,
+            answer
+        ))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Ошибка при записи в БД: {e}")
+
+def log_analytics(user_id, action, completion_tokens=0, prompt_tokens=0, messages=None, answer=None):
+    """Логирование действий пользователя в CSV файл и БД."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # Создаем файл, если он не существует
+    # Запись в CSV
     file_exists = os.path.isfile(ANALYTICS_FILE)
     
     try:
@@ -57,7 +117,10 @@ def log_analytics(user_id, action, completion_tokens=0, prompt_tokens=0):
                 'model': model
             })
     except Exception as e:
-        logger.error(f"Ошибка при записи аналитики: {e}")
+        logger.error(f"Ошибка при записи в CSV: {e}")
+    
+    # Запись в PostgreSQL
+    log_to_db(user_id, action, completion_tokens, prompt_tokens, messages, answer)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -106,7 +169,14 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Логируем событие answer с информацией о токенах
         completion_tokens = response.usage.completion_tokens
         prompt_tokens = response.usage.prompt_tokens
-        log_analytics(user_id, "answer", completion_tokens, prompt_tokens)
+        log_analytics(
+            user_id, 
+            "answer", 
+            completion_tokens, 
+            prompt_tokens, 
+            messages=messages, 
+            answer=bot_response
+        )
         
         # Отправка ответа пользователю
         await update.message.reply_text(bot_response)
